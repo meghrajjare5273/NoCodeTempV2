@@ -138,6 +138,29 @@ export function PreprocessStep() {
     summaries,
   ]);
 
+  useEffect(() => {
+    if (summaries && Object.keys(summaries).length > 0) {
+      const allColumns = Object.values(summaries).flatMap(
+        (s: any) => s.summary.columns
+      );
+      const uniqueColumns = Array.from(new Set(allColumns));
+      const categoricalCols = uniqueColumns.filter((col) =>
+        Object.values(summaries).some(
+          (s: any) => s.summary.data_types[col] === "object"
+        )
+      );
+      const numericCols = uniqueColumns.filter((col) =>
+        Object.values(summaries).some(
+          (s: any) =>
+            s.summary.data_types[col] === "float64" ||
+            s.summary.data_types[col] === "int64"
+        )
+      );
+      setEncodingColumns(categoricalCols);
+      setScalingColumns(numericCols);
+    }
+  }, [summaries]);
+
   const handlePreprocess = async () => {
     if (!files.length) return setError("Please upload files first.");
 
