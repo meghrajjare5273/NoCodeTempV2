@@ -64,10 +64,10 @@ async def preprocess_endpoint(
     files: list[UploadFile] = File(...),
     missing_strategy: str = Form(...),
     scaling: bool = Form(...),
-    scaling_columns: str = Form(""),  # Comma-separated string of column names
+    scaling_columns: str = Form(""),
     encoding: str = Form(...),
-    encoding_columns: str = Form(""),  # Comma-separated string of column names
-    target_column: str = Form(None)  # Optional target column
+    encoding_columns: str = Form(""),
+    target_column: str = Form(None)  # Already optional, no change needed
 ):
     try:
         results = {}
@@ -99,13 +99,13 @@ async def preprocess_endpoint(
                 raise ValueError(f"Invalid encoding columns: {', '.join(invalid_encoding_cols)}")
             
             df_processed = preprocess_data(
-                df, 
-                missing_strategy=missing_strategy, 
-                scaling=scaling, 
+                df,
+                missing_strategy=missing_strategy,
+                scaling=scaling,
                 scaling_columns=scaling_cols if scaling_cols else None,
-                encoding=encoding, 
+                encoding=encoding,
                 encoding_columns=encoding_cols if encoding_cols else None,
-                target_column=target_column
+                target_column=target_column  # Pass even if empty
             )
             
             preprocessed_file = save_preprocessed_data(df_processed, filename=f"preprocessed_{file.filename}")

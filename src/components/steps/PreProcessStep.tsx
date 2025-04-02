@@ -192,7 +192,7 @@ export function PreprocessStep() {
         showScalingColumnSelector ? scalingColumns.join(",") : "",
         encoding,
         showEncodingColumnSelector ? encodingColumns.join(",") : "",
-        isTargetEncodingMethod ? targetColumn : "",
+        targetColumn, // Always pass targetColumn, not just for target encoding
         setProgress
       );
       setPreprocessedFiles(
@@ -205,11 +205,8 @@ export function PreprocessStep() {
       );
       setActiveStep("train");
     } catch (error: any) {
-      console.error("Error preprocessing files:", error.message);
       setError(
-        `Preprocessing failed: ${
-          error.response?.data?.error || error.message
-        }. Ensure backend is running.`
+        `Preprocessing failed: ${error.response?.data?.error || error.message}.`
       );
     } finally {
       setIsLoading(false);

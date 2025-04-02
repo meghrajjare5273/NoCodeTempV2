@@ -60,19 +60,6 @@ class ModelTrainer:
         }
 
     def train_model(self, df, target_column=None, task_type="clustering", model_type=None, params=None):
-        """
-        Train a model based on the specified task type and model type
-        
-        Args:
-            df (pd.DataFrame): Input data
-            target_column (str): Target column name
-            task_type (str): Type of ML task (classification, regression, clustering)
-            model_type (str): Type of model to use
-            params (dict): Optional parameters for the model
-            
-        Returns:
-            dict: Dictionary with model results
-        """
         try:
             if task_type not in ["classification", "regression", "clustering", "dimensionality_reduction"]:
                 logger.error(f"Unsupported task type: {task_type}")
@@ -80,30 +67,18 @@ class ModelTrainer:
                 
             logger.info(f"Training with task_type: {task_type}, model_type: {model_type}, target_column: {target_column}")
             logger.debug(f"DataFrame columns: {df.columns.tolist()}")
-            
-            # Set default model type if not specified
-            if model_type is None:
-                if task_type == "classification":
-                    model_type = "logistic_regression"
-                elif task_type == "regression":
-                    model_type = "linear_regression"
-                elif task_type == "clustering":
-                    model_type = "kmeans"
-                elif task_type == "dimensionality_reduction":
-                    model_type = "pca"
-            
-            # Handle supervised tasks (classification, regression)
+        
             if task_type in ["classification", "regression"]:
-                if target_column and target_column in df.columns:
-                    X = df.drop(columns=[target_column])
-                    y = df[target_column]
-                    logger.debug(f"Features (X) shape: {X.shape}, Target (y) shape: {y.shape}")
-                    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-                else:
-                    logger.error(f"No valid target column '{target_column}' provided for {task_type}")
-                    return {"error": f"No valid target column '{target_column}' provided for {task_type}"}
+                if not target_column:  # Explicitly check for None or empty string
+                    logger.error(f"No target column specified for {task_type}")
+                    return {"error": f"A target column is required for {task_type} but none was provided"}
+                if target_column not in df.columns:
+                    logger.error(f"Target column '{target_column}' not found in dataset columns: {df.columns.tolist()}")
+                    return {"error": f"Target column '{target_column}' not found in dataset columns: {df.columns.tolist()}"}
+                X = df.drop(columns=[target_column])
+                y = df[target_column]
+                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
             else:
-                # Handle unsupervised tasks
                 X = df
                 X_train, X_test = train_test_split(X, test_size=0.2, random_state=42)
                 y = None
